@@ -4,6 +4,7 @@
 #include <string>
 #include <iomanip>
 #include <limits>
+#include <sstream> // Essential for stringstream line parsing
 
 class Person {
 public:
@@ -61,15 +62,23 @@ public:
         std::ifstream df(doctorFile);
         if (!df) { std::cout << "No doctors registered.\n"; return; }
         
-        int id;
-        std::string name, spec, line;
-        double fees;
+        std::string line;
         std::cout << "\n--- Registered Doctors ---\n";
-        std::cout << std::left << std::setw(10) << "ID" << std::setw(20) << "Name" << std::setw(20) << "Specialty" << "Fees" << std::endl;
-        while (df >> id) {
-            df.ignore(1, '|'); std::getline(df, name, '|');
-            std::getline(df, spec, '|'); df >> fees;
-            std::cout << std::left << std::setw(10) << id << std::setw(20) << name << std::setw(20) << spec << "$" << fees << std::endl;
+        std::cout << std::left << std::setw(10) << "ID" << std::setw(20) << "Name" 
+                  << std::setw(20) << "Specialty" << "Fees" << std::endl;
+        
+        while (std::getline(df, line)) {
+            if (line.empty()) continue;
+            std::stringstream ss(line);
+            std::string id, name, spec, fees;
+            
+            std::getline(ss, id, '|');
+            std::getline(ss, name, '|');
+            std::getline(ss, spec, '|');
+            std::getline(ss, fees, '|');
+            
+            std::cout << std::left << std::setw(10) << id << std::setw(20) << name 
+                      << std::setw(20) << spec << "$" << fees << std::endl;
         }
         df.close();
     }
@@ -93,22 +102,33 @@ public:
 
     // --- Appointment & Billing ---
     void bookAppointment() {
-        int pId, dId, targetDId;
-        std::string date, dName, pName;
-        double dFees;
+        int dId;
+        std::string date, pId;
+        std::string targetDName;
+        double targetDFees = 0.0;
         bool docFound = false;
 
         viewDoctors();
         std::cout << "\nEnter Doctor ID to book with: "; std::cin >> dId;
         
-        // Find doctor details from file
         std::ifstream df(doctorFile);
-        int currentDId;
-        while (df >> currentDId) {
-            df.ignore(1, '|'); std::getline(df, dName, '|');
-            std::string tempSpec; std::getline(df, tempSpec, '|');
-            df >> dFees;
-            if (currentDId == dId) { docFound = true; break; }
+        std::string line;
+        while (std::getline(df, line)) {
+            if (line.empty()) continue;
+            std::stringstream ss(line);
+            std::string idStr, nameStr, specStr, feesStr;
+            
+            std::getline(ss, idStr, '|');
+            std::getline(ss, nameStr, '|');
+            std::getline(ss, specStr, '|');
+            std::getline(ss, feesStr, '|');
+            
+            if (std::stoi(idStr) == dId) {
+                targetDName = nameStr;
+                targetDFees = std::stod(feesStr);
+                docFound = true;
+                break;
+            }
         }
         df.close();
 
@@ -120,37 +140,63 @@ public:
         std::cout << "Enter Patient ID: "; std::cin >> pId;
         std::cout << "Enter Date (DD-MM-YYYY): "; std::cin >> date;
 
-        double totalBill = dFees + 100.0; // Adding Hospital Service Charge
+        double totalBill = targetDFees + 100.0; // Service Charge
 
         std::ofstream af(appointmentFile, std::ios::app);
-        af << pId << "|" << dName << "|" << date << "|" << totalBill << "\n";
+        af << pId << "|" << targetDName << "|" << date << "|" << totalBill << "\n";
         af.close();
 
-        std::cout << "\n--- Appointment Booked & Bill Generated ---\n";
-        std::cout << "Consultant: Dr. " << dName << "\nTotal Fees (incl. tax): $" << totalBill << "\n";
+        std::cout << "\n--- Appointment Booked ---\n";
+        std::cout << "Consultant: Dr. " << targetDName << "\nTotal Fees: $" << std::fixed << std::setprecision(2) << totalBill << "\n";
     }
 
     // --- Reports Generation ---
     void generateReport() {
         std::ifstream af(appointmentFile);
-        if (!af) { std::cout << "No data available for reports.\n"; return; }
+        if (!af) { 
+            std::cout << "No data available for reports.\n"; 
+            return; 
+        }
 
         int count = 0;
         double totalRevenue = 0;
-        std::string line, pId, dName, date;
-        double bill;
+        std::string line;
 
         std::cout << "\n========== HOSPITAL SUMMARY REPORT ==========\n";
-        std::cout << std::left << std::setw(15) << "Patient ID" << std::setw(20) << "Doctor" << std::setw(15) << "Date" << "Bill Amount" << std::endl;
+        std::cout << std::left << std::setw(15) << "Patient ID" 
+                  << std::setw(20) << "Doctor" 
+                  << std::setw(15) << "Date" 
+                  << "Bill Amount" << std::endl;
         std::cout << "------------------------------------------------------------\n";
 
-        while (af >> pId) {
-            af.ignore(1, '|'); std::getline(af, dName, '|');
-            std::getline(af, date, '|'); af >> bill;
-            
-            std::cout << std::left << std::setw(15) << pId << std::setw(20) << dName << std::setw(15) << date << "$" << bill << std::endl;
-            totalRevenue += bill;
-            count++;
+        while (std::getline(af, line)) {
+            if (line.empty()) continue;
+
+            std::stringstream ss(line);
+            std::string pId, dName, date, billStr;
+
+            // Extract each part separated by '|'
+            std::getline(ss, pId, '|');
+            std::getline(ss, dName, '|');
+            std::getline(ss, date, '|');
+            std::getline(ss, billStr, '|');
+
+            if (!billStr.empty()) {
+                try {
+                    double billValue = std::stod(billStr); 
+                    
+                    std::cout << std::left << std::setw(15) << pId 
+                              << std::setw(20) << dName 
+                              << std::setw(15) << date 
+                              << "$" << std::fixed << std::setprecision(2) << billValue << std::endl;
+                    
+                    totalRevenue += billValue;
+                    count++;
+                } catch (...) {
+                    // Skip malformed conversion lines
+                    continue;
+                }
+            }
         }
         af.close();
 
