@@ -1,0 +1,2 @@
+1|Dr. Khanna|Cardiology|1200
+2|Dr. Joshi|Orthopedics|1000

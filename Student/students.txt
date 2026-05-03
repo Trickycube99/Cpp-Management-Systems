@@ -1,0 +1,3 @@
+101|Aman Singh|85|A
+102|Priya Sharma|92|A
+103|Rahul Verma|74|B
