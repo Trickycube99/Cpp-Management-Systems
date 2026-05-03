@@ -23,6 +23,3 @@ A multi-entity management system that links Patients, Doctors, and Appointments.
 
 
 ![4](./4.png)
-
-
-![5](./5.png)
