@@ -12,3 +12,17 @@ A robust Command Line Interface (CLI) application designed to handle student rec
 - **C++ STL**: Used `std::vector` for memory management and `std::numeric_limits` for buffer clearing.
 - **Defensive Programming**: Implemented checks for file availability and ID collisions.
 - **Data Encapsulation**: Used classes to separate data logic from file I/O logic.
+
+![1](./1.png)
+
+
+![2](./2.png)
+
+
+![3](./3.png)
+
+
+![4](./4.png)
+
+
+![5](./5.png)
