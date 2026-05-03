@@ -12,3 +12,17 @@ A multi-entity management system that links Patients, Doctors, and Appointments.
 - **Inheritance**: Used a base `Person` class for Patients and Doctors to reduce code redundancy.
 - **Complex File I/O**: Parsing multiple interconnected text files.
 - **Business Logic**: Automated billing including consultation fees and service taxes.
+
+![1](./1.png)
+
+
+![2](./2.png)
+
+
+![3](./3.png)
+
+
+![4](./4.png)
+
+
+![5](./5.png)
