@@ -12,3 +12,9 @@ A CLI-based banking application simulating real-world financial transactions and
 - **Constructors & Destructors**: Managed object lifecycle and safe data flushing.
 - **Transaction Logging**: Used `<ctime>` to implement real-time activity tracking.
 - **File Manipulation**: Used `std::ios::trunc` for safe data overwriting.
+
+![1](./1.png)
+![2](./2.png)
+![3](./3.png)
+![4](./4.png)
+![5](./5.png)
